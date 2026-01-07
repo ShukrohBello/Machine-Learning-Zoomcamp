@@ -1,3 +1,82 @@
+import pickle
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import (
+    accuracy_score,
+    roc_auc_score,
+    classification_report,
+    confusion_matrix
+)
+
+MODEL_PATH = "model.bin"
+RANDOM_STATE = 42
+
+def load_data(csv_path: str = '././heart_failure_clinical_records_dataset.csv') -> pd.DataFrame:
+    """Load dataset and standardize target column name."""
+    df = pd.read_csv(csv_path)
+    df = df.rename(columns={"DEATH_EVENT": "death_event"})
+    # Ensure target is integer 0/1
+    df["death_event"] = df["death_event"].astype(int)
+    return df
+
+def make_pipeline() -> Pipeline:
+    """Create a pipeline: DictVectorizer -> LogisticRegression."""
+    return Pipeline(steps=[
+        ("dv", DictVectorizer(sparse=False)),
+        ("clf", LogisticRegression(
+            max_iter=1000,
+            solver="liblinear",  # supports L1 penalty & predict_proba
+            penalty="l1",
+            class_weight="balanced",  # helpful for moderate imbalance
+            random_state=RANDOM_STATE
+        ))
+    ])
+
+def train_and_evaluate(df: pd.DataFrame) -> Pipeline:
+    """Train the pipeline and print evaluation metrics on a held-out test set."""
+    X = df.drop(columns=["death_event"])
+    y = df["death_event"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.2,
+        random_state=RANDOM_STATE,
+        stratify=y
+    )
+
+    # List-of-dicts for DictVectorizer
+    train_dicts = X_train.to_dict(orient="records")
+    test_dicts  = X_test.to_dict(orient="records")
+
+    pipeline = make_pipeline()
+    pipeline.fit(train_dicts, y_train)
+
+    # Evaluation
+    y_pred_test = pipeline.predict(test_dicts)
+    y_proba_test = pipeline.predict_proba(test_dicts)[:, 1]
+
+    print("\n=== TEST RESULTS ===")
+    print("Confusion matrix:\n", confusion_matrix(y_test, y_pred_test))
+    print("Accuracy:", f"{accuracy_score(y_test, y_pred_test):.4f}")
+    print("ROC-AUC:", f"{roc_auc_score(y_test, y_proba_test):.4f}")
+    print("Classification report:\n", classification_report(y_test, y_pred_test, digits=3))
+
+    return pipeline
+
+def save_pipeline(pipeline: Pipeline, filename: str = MODEL_PATH) -> None:
+    with open(filename, "wb") as f_out:
+        pickle.dump(pipeline, f_out)
+    print(f"\nModel pipeline saved to {filename}")
+
+if __name__ == "__main__":
+    df = load_data()
+    pipeline = train_and_evaluate(df)
+    save_pipeline(pipeline, MODEL_PATH)
+
+
 # import pandas as pd
 # import numpy as np
 # import matplotlib.pyplot as plt
@@ -80,80 +159,3 @@
 
 
 # train.py
-import pickle
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import (
-    accuracy_score,
-    roc_auc_score,
-    classification_report,
-    confusion_matrix
-)
-
-MODEL_PATH = "model.bin"
-RANDOM_STATE = 42
-
-def load_data(csv_path: str = '././heart_failure_clinical_records_dataset.csv') -> pd.DataFrame:
-    """Load dataset and standardize target column name."""
-    df = pd.read_csv(csv_path)
-    df = df.rename(columns={"DEATH_EVENT": "death_event"})
-    # Ensure target is integer 0/1
-    df["death_event"] = df["death_event"].astype(int)
-    return df
-
-def make_pipeline() -> Pipeline:
-    """Create a pipeline: DictVectorizer -> LogisticRegression."""
-    return Pipeline(steps=[
-        ("dv", DictVectorizer(sparse=False)),
-        ("clf", LogisticRegression(
-            max_iter=1000,
-            solver="liblinear",  # supports L1 penalty & predict_proba
-            penalty="l1",
-            class_weight="balanced",  # helpful for moderate imbalance
-            random_state=RANDOM_STATE
-        ))
-    ])
-
-def train_and_evaluate(df: pd.DataFrame) -> Pipeline:
-    """Train the pipeline and print evaluation metrics on a held-out test set."""
-    X = df.drop(columns=["death_event"])
-    y = df["death_event"]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=0.2,
-        random_state=RANDOM_STATE,
-        stratify=y
-    )
-
-    # List-of-dicts for DictVectorizer
-    train_dicts = X_train.to_dict(orient="records")
-    test_dicts  = X_test.to_dict(orient="records")
-
-    pipeline = make_pipeline()
-    pipeline.fit(train_dicts, y_train)
-
-    # Evaluation
-    y_pred_test = pipeline.predict(test_dicts)
-    y_proba_test = pipeline.predict_proba(test_dicts)[:, 1]
-
-    print("\n=== TEST RESULTS ===")
-    print("Confusion matrix:\n", confusion_matrix(y_test, y_pred_test))
-    print("Accuracy:", f"{accuracy_score(y_test, y_pred_test):.4f}")
-    print("ROC-AUC:", f"{roc_auc_score(y_test, y_proba_test):.4f}")
-    print("Classification report:\n", classification_report(y_test, y_pred_test, digits=3))
-
-    return pipeline
-
-def save_pipeline(pipeline: Pipeline, filename: str = MODEL_PATH) -> None:
-    with open(filename, "wb") as f_out:
-        pickle.dump(pipeline, f_out)
-    print(f"\nModel pipeline saved to {filename}")
-
-if __name__ == "__main__":
-    df = load_data()
-    pipeline = train_and_evaluate(df)
-    save_pipeline(pipeline, MODEL_PATH)
