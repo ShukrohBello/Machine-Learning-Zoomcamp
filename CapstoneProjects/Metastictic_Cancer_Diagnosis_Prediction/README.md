@@ -1,0 +1,10 @@
+### Metastic Cancer Diagnosis Prediction
+
+### Overview: The Dataset and Challenge
+> Gilead Sciences provided a rich, real-world dataset which contains information about demographics, diagnosis and treatment options, and insurance provided about patients who were diagnosed with breast cancer. The dataset originated from Health Verity, one of the largest healthcare data ecosystems in the US. It was enriched with third party geo-demographic data to provide views into the socio economic aspects that may contribute to health equity. For this challenge, the dataset was then further enriched with zip code level climate data.
+
+**Challenge task:** You will be asked to predict the duration of time it takes for patients to receive metastatic cancer diagnosis.
+
+**Why is this important?** Metastatic TNBC is considered the most aggressive TNBC and requires urgent and timely treatment. Unnecessary delays in diagnosis and subsequent treatment can have devastating effects in these difficult cancers. Differences in the wait time to get treatment is a good proxy for disparities in healthcare access.
+
+The primary goal of building these models is to detect relationships between demographics of the patient with the likelihood of getting timely treatment. The secondary goal is to see if climate patterns impact proper diagnosis and treatment.Gilead Sciences, Inc. is a biopharmaceutical company that specializes in the research, development, and commercialization of medicines, primarily in the fields of virology, infectious diseases, oncology, and other areas of unmet medical need. At Gilead, we are committed to creating a healthier world for everyone. And ​​​​​​​through bold and transformative science, we’re driving innovation that has the potential to become the next generation of life-changing medicines.
