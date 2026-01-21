@@ -12,7 +12,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
-DATA_PATH = "data/train.csv"
+DATA_PATH = "train.csv"
 
 def load_data():
     df = pd.read_csv(DATA_PATH)
@@ -75,8 +75,11 @@ def train():
     pipeline = build_pipeline(categorical_cols, numeric_cols)
     pipeline.fit(X_train, y_train)
 
+
+
     preds = pipeline.predict(X_val)
-    rmse = mean_squared_error(y_val, preds, squared=False)
+    mse = mean_squared_error(y_val, preds)  # works in all versions
+    rmse = np.sqrt(mse)
     print("Validation RMSE:", rmse)
 
     with open("model.pkl", "wb") as f:
@@ -90,3 +93,5 @@ def train():
 
 if __name__ == "__main__":
     train()
+
+    
