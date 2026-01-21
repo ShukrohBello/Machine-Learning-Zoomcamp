@@ -40,6 +40,7 @@ patient_id,metastatic_diagnosis_period
 ├── model.pkl     # Trained pipeline artifact (created by train.py)
 ├── train.csv
 └── test.csv
+```
 
 ### Environment management
 
@@ -65,7 +66,7 @@ When you get a fresh copy of a project that already uses uv, you can install all
 
 ```uv sync```
 
-### Docker Containerisation
+### Docker Containerization
 ```
 FROM python:3.13.5-slim-bookworm
 
